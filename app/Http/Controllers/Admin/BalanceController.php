@@ -24,6 +24,29 @@ class BalanceController extends Controller
     public function depositStore(Request $request){
 
         $balance = auth()->user()->balance()->firstOrCreate([]);
-        dd($balance->deposit($request->value));
+        $response = $balance->deposit($request->value);
+
+        if($response)
+            return redirect()->route('admin.balance')->with('success',$response['message']);
+
+        return redirect()->back()->with('error',$response['message']);
+    }
+
+    public function withdrawn(){
+
+        return view('admin.balance.withdrawn');
+    }
+
+    public function withdrawnStore(Request $request){
+
+        dd($request->all());
+
+        $balance = auth()->user()->balance()->firstOrCreate([]);
+        $response = $balance->deposit($request->value);
+
+        if($response)
+            return redirect()->route('admin.balance')->with('success',$response['message']);
+
+        return redirect()->back()->with('error',$response['message']);
     }
 }
