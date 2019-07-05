@@ -2,7 +2,8 @@
 
 Route::group(['middleware' => ['auth'], 'namespace' => 'Admin', 'prefix' => 'admin'], function(){
 
-    Route::post('transfet','BalanceController@transferStore')->name('transfer.store');
+    Route::post('transfer.concluir','BalanceController@transferConcluir')->name('transfer.concluir');
+    Route::post('transfer','BalanceController@transferStore')->name('transfer.store');
     Route::get('transfer','BalanceController@transfer')->name('balance.transfer');
     Route::post('withdrawn','BalanceController@withdrawnStore')->name('withdrawn.store');
     Route::get('withdrawn','BalanceController@withdrawn')->name('balance.withdrawn');

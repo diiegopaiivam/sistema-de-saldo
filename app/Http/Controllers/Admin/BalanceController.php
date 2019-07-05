@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Balances;
+use App\User;
 
 class BalanceController extends Controller
 {
@@ -53,9 +54,24 @@ class BalanceController extends Controller
         return view('admin.balance.transfer');
     }
 
-    public function transferStore(Request $request){
+    public function transferStore(Request $request, User $user){
+
+        if(!$sender = $user->getSender($request->sender)){
+
+            return redirect()->back()->with('error','Usuário inexistente!');
+        }
+
+        if($sender->id === auth()->user()->id){
+
+            return redirect()->back()->with('error','Você não pode transferir para você mesmo!');
+        }
+
+        return view ('admin.balance.transfer-confirm', compact('sender'));
+            
+    }
+
+    public function transferConcluir (Request $request){
 
         dd($request->all());
-        
     }
 }
