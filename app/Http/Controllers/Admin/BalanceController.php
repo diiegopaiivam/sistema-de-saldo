@@ -39,14 +39,23 @@ class BalanceController extends Controller
 
     public function withdrawnStore(Request $request){
 
-        dd($request->all());
-
         $balance = auth()->user()->balance()->firstOrCreate([]);
-        $response = $balance->deposit($request->value);
+        $response = $balance->withdrawn($request->value);
 
         if($response)
             return redirect()->route('admin.balance')->with('success',$response['message']);
 
         return redirect()->back()->with('error',$response['message']);
+    }
+
+    public function transfer(){
+
+        return view('admin.balance.transfer');
+    }
+
+    public function transferStore(Request $request){
+
+        dd($request->all());
+        
     }
 }
