@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use App\User;
 
 class Balances extends Model
 {
@@ -83,5 +84,65 @@ class Balances extends Model
             ];
         }
     }
+
+    public function transfer(float $value, $sender): Array {
+
+        if ($this->amount < $value) 
+            return[
+                'success' => false,
+                'message' => 'Saldo Insuficiente',
+            ];
+
+        DB::beginTransaction();
+
+        /*Atualiza o proprio saldo*/
+
+        $totalBefore = $this->amount ? $this->amount : 0;
+        $this->amount -= number_format ($value, 2, '.','');
+        $transfer = $this->save();
+
+        $historic = auth()->user()->historics()->create([
+            'type'                  => 'T',
+            'amount'                => $value,
+            'total_before'          => $totalBefore,
+            'total_after'           => $this->amount,
+            'date'                  => date('Ymd'),
+            'user_id_transaction'   => $sender->id,
+        ]);
+        
+        /*Atualiza o Saldo do Recebedor*/
+
+        $senderBalance = $sender->balance()->firstOrCrate([]);
+        $totalBeforeSender = $senderBalance->amount ? $senderBalance->amount : 0;
+        $senderBalance->amount += number_format ($value, 2, '.','');
+        $transferSender = $this->save();
+
+        $historicSender = $sender->historics()->create([
+            'type'                  => 'I',
+            'amount'                => $value,
+            'total_before'          => $totalBeforeSender,
+            'total_after'           => $senderBalance->amount,
+            'date'                  => date('Ymd'),
+            'user_id_transaction'   => auth()->user()->id,
+        ]);
+
+        if ($transfer && $historic  && $transferSender && $historicSender) {
+
+            DB::commit();
+
+            return [
+                'sucess'    => true,
+                'message'   => 'Sucesso ao transferir!'
+            ];
+        } else {
+
+            DB::rollback();
+            return [
+                'sucess'    => false,
+                'message'   => 'Não foi possível realizar a transferência'
+            ];
+        }
+    }
+
 
 }

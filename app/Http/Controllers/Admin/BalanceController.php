@@ -6,9 +6,15 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Balances;
 use App\User;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
+use DB;
+use App\Http\Requests\UpdateProfileFormRequest;
 
 class BalanceController extends Controller
 {
+
+    
     public function index(){
         
         $balance = auth()->user()->balance;
@@ -66,12 +72,33 @@ class BalanceController extends Controller
             return redirect()->back()->with('error','Você não pode transferir para você mesmo!');
         }
 
-        return view ('admin.balance.transfer-confirm', compact('sender'));
+        $balance = auth()->user()->balance;
+
+        return view ('admin.balance.transfer-confirm', compact('sender','balance'));
             
     }
 
-    public function transferConcluir (Request $request){
+    public function transferConcluir (Request $request, User $user){
 
-        dd($request->all());
+        if (!$sender = $user->find($request->sender_id))
+            return redirect()->route('balance.transfer')->with('success','Recebedor não encontrado!');
+
+        
+
+        $balance = auth()->user()->balance();
+        $response = $balance->transfer($request->value);
+
+        if($response)
+            return redirect()->route('admin.balance')->with('success',$response['message']);
+
+        return redirect()->back()->with('error',$response['message']);
+    }
+
+    public function historic() {
+
+        $historics = auth()->user()->historics()->get();
+        
+
+        return view('admin.balance.historic', compact('historics'));
     }
 }

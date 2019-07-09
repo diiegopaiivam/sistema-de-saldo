@@ -25,13 +25,15 @@
 
             <p><strong>Nome do Recebedor: </strong>{{ $sender->name }}</p>
             <p><strong>Email do Recebedor: </strong>{{ $sender->email }}</p>
+            <p><strong>Seu saldo atual é: </strong>{{ number_format($balance->amount, 2 , ',', '') }}</p>
+
             <form method="POST" action="{{ route('transfer.concluir') }}">
                 {!! csrf_field() !!}
 
                 <input type="hidden" name="sender_id" value="{{ $sender->id }}">
 
                 <div class="form-group">
-                    <input type="text" name="balance" placeholder="Informe o valor">
+                    <input type="text" name="value" placeholder="Informe o valor">
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn btn-success">Transferir</button>
